@@ -6,7 +6,7 @@ from google.genai import types
 st.set_page_config(page_title="문민승의 Interactive Portfolio", page_icon="👋", layout="wide")
 
 # 2. API 키 설정
-API_KEY = st.secrets["AIzaSyB43eCH8GExZsvdvjpEQKc3-OuPdUGONkI"]
+API_KEY = st.secrets["GEMINI_API_KEY"]
 
 # 3. [인터랙티브 포트폴리오 맞춤형] 시스템 지침
 SYSTEM_INSTRUCTION = """
