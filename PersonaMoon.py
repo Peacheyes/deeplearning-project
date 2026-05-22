@@ -5,7 +5,51 @@ from PIL import Image  # 🌟 이미지 처리를 위한 라이브러리 추가
 
 # 1. 페이지 기본 설정
 st.set_page_config(page_title="문민승의 Multi-Persona Twin", page_icon="🤖", layout="wide")
+# ==========================================
+# 🎨 1-1. 프론트엔드 커스텀 CSS 주입
+# ==========================================
+st.markdown("""
+<style>
+    /* 1. 기본 Streamlit 워터마크 및 메뉴 숨기기 */
+    #MainMenu {visibility: hidden;} /* 우측 상단 햄버거 메뉴 숨김 */
+    footer {visibility: hidden;} /* 하단 'Made with Streamlit' 숨김 */
+    header {visibility: hidden;} /* 상단 여백 공간 숨김 */
 
+    /* 2. 채팅 말풍선 전체적인 둥글기 및 그림자 효과 */
+    [data-testid="stChatMessage"] {
+        border-radius: 15px;
+        padding: 10px 15px;
+        margin-bottom: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        background-color: #f9f9f9; /* 배경색 살짝 밝게 */
+    }
+
+    /* 3. 추천 버튼 호버(Hover) 효과 (마우스 올렸을 때 액션) */
+    [data-testid="stButton"] button {
+        border-radius: 20px;
+        border: 1.5px solid #0066cc; /* 파란색 테두리 */
+        color: #0066cc;
+        background-color: transparent;
+        transition: all 0.3s ease; /* 애니메이션 속도 */
+    }
+
+    [data-testid="stButton"] button:hover {
+        background-color: #0066cc; /* 마우스 올리면 파란색 배경으로 */
+        color: white; /* 글자는 흰색으로 */
+        box-shadow: 0 4px 8px rgba(0, 102, 204, 0.3); /* 그림자 쫙 퍼짐 */
+        border-color: #0066cc;
+    }
+
+    /* 4. 파일 업로드 박스 디자인 다듬기 */
+    [data-testid="stFileUploader"] {
+        border-radius: 15px;
+        padding: 10px;
+        background-color: #f0f2f6;
+        border: 1px dashed #b3b8c2;
+    }
+</style>
+""", unsafe_allow_html=True)
+# ==========================================
 # 2. API 키 설정 (Streamlit Cloud 환경 변수 사용)
 API_KEY = st.secrets["GEMINI_API_KEY"]
 client = genai.Client(api_key=API_KEY)
@@ -21,9 +65,9 @@ SYS_CASUAL = """
 1. 1인칭('저', '제가')을 사용하고 친근한 대화체(~요, ~죠)를 쓴다.
 2. 사용자가 사진을 올리면, 친한 친구처럼 사진에 대해 가볍고 재치 있게 리액션하라.
 [나의 취향 데이터]
-- 영화: 웨스 앤더슨, 호러(유전), 크리스토퍼 놀란. 장르 불문 다양하게 본다.
-- 음악: 류이치 사카모토, 검정치마, wave to earth. (EDM 비선호)
-- 음식: 마라탕, 떡볶이, 아이스 아메리카노 매니아.
+- 영화: 웨스 앤더슨, 호러(유전), 크리스토퍼 놀란. 장르 불문 다양하게 보고 영상미를 중시
+- 음악: 류이치 사카모토, 검정치마, wave to earth와 같은 서정적이고 음악 (EDM 비선호)
+- 음식: 부대찌개, 짬뽕 같은 얼큰한 음식, 음료는 깔끔한 아이스 아메리카노 매니아.
 """
 
 SYS_TECH = """
@@ -66,9 +110,15 @@ with st.sidebar:
     """)
 
 # ==========================================
-# 5. 모드 변경 감지 및 세션 초기화 로직
+# 5. 모드 변경 감지 및 세션 초기화 로직 (토스트 알림 추가)
 # ==========================================
+# 모드 변경을 감지하는 로직
 if "current_mode" not in st.session_state or st.session_state.current_mode != selected_mode:
+
+    # 🌟 동적 UI 1: 처음 접속할 때가 아니라, '모드를 변경'했을 때만 우측 하단에 알림 띄우기
+    if "current_mode" in st.session_state:
+        st.toast(f"에이전트가 {selected_mode}로 교체되었습니다! 🔄", icon="✨")
+
     st.session_state.current_mode = selected_mode
     st.session_state.messages = []
 
@@ -95,7 +145,7 @@ if "current_mode" not in st.session_state or st.session_state.current_mode != se
     st.session_state.messages.append({"role": "assistant", "content": welcome_msg, "image": None})
 
 # ==========================================
-# 6. 메인 화면 및 추천 질문 버튼
+# 6. 메인 화면 및 추천 질문 버튼 (Expander 추가)
 # ==========================================
 st.title(f"{selected_mode}")
 st.write("아래 추천 질문을 클릭하거나 직접 입력해 보세요! 이미지 분석도 가능합니다.")
@@ -116,16 +166,40 @@ else:
     if col2.button("🤝 팀플 역할 분담 방식"): button_prompt = "팀 프로젝트를 할 때 일을 N분의 1로 나누는 것에 대해 어떻게 생각하나요?"
     if col3.button("⚡ 팀원 간 의견 충돌 시"): button_prompt = "프로젝트 진행 중 팀원들과 의견 충돌(노이즈)이 발생하면 어떻게 대처하나요?"
 
+# 🌟 동적 UI 2: 파일 업로드 창을 아코디언 메뉴(Expander)로 숨기기
+with st.expander("📎 이미지 및 차트 분석 기능 열기 (선택사항)", expanded=False):
+    uploaded_file = st.file_uploader("분석할 이미지(차트, 데이터 분포, 다이어그램 등)가 있다면 이곳에 올려주세요.", type=['png', 'jpg', 'jpeg'])
+    st.caption("※ 이미지를 업로드한 후, 메인 채팅창에 질문을 입력하시면 AI가 함께 분석해 드립니다.")
 # 🌟 이미지 업로드 UI 추가
 uploaded_file = st.file_uploader("📎 분석할 이미지나 차트가 있다면 업로드해 주세요 (선택사항)", type=['png', 'jpg', 'jpeg'])
+
+# ==========================================
+# 🌟 아바타(Avatar) 결정 헬퍼 함수 추가
+# ==========================================
+def get_avatar(role, mode):
+    if role == "user":
+        return "👤"  # 방문자(면접관)의 아이콘
+    else:
+        # 선택된 모드에 따라 AI의 프로필 아이콘이 다르게 나타남
+        if mode == "☕ 일상 & 취향 모드":
+            return "☕"
+        elif mode == "💻 전공 & 기술 모드":
+            return "💻"
+        elif mode == "🤝 협업 & 철학 모드":
+            return "🤝"
+        else:
+            return "🤖"
+
 
 # ==========================================
 # 7. 화면에 대화 및 업로드된 이미지 출력
 # ==========================================
 for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
+    # 저장된 메시지를 렌더링할 때 아바타 적용
+    avatar_icon = get_avatar(message["role"], st.session_state.current_mode)
+
+    with st.chat_message(message["role"], avatar=avatar_icon):
         st.markdown(message["content"])
-        # 기록된 메시지에 이미지가 있다면 렌더링
         if message.get("image") is not None:
             st.image(message["image"], width=400)
 
@@ -137,29 +211,26 @@ prompt = st.chat_input("질문을 입력해주세요...")
 if prompt or button_prompt:
     final_prompt = prompt if prompt else button_prompt
 
-    # 이미지가 업로드 된 경우 PIL Image 객체로 변환
     img_to_send = None
     if uploaded_file is not None:
         img_to_send = Image.open(uploaded_file)
+        img_to_send.thumbnail((800, 800))  # 이미지 다이어트
 
-        # 🌟 속도 최적화: 이미지가 너무 크면 전송 속도가 느려지므로 크기를 줄임 (비율 유지)
-        img_to_send.thumbnail((800, 800))
-
-    # 1) 사용자 메시지와 이미지 출력
-    with st.chat_message("user"):
+    # 1) 사용자 메시지 출력 (사용자 아바타 적용)
+    user_avatar = get_avatar("user", st.session_state.current_mode)
+    with st.chat_message("user", avatar=user_avatar):
         st.markdown(final_prompt)
         if img_to_send:
             st.image(img_to_send, width=400)
 
-    # 상태에 저장
     st.session_state.messages.append({"role": "user", "content": final_prompt, "image": img_to_send})
 
-    # 2) AI 응답 처리
-    with st.chat_message("assistant"):
+    # 2) AI 응답 처리 (현재 모드에 맞는 AI 아바타 적용)
+    ai_avatar = get_avatar("assistant", st.session_state.current_mode)
+    with st.chat_message("assistant", avatar=ai_avatar):
         message_placeholder = st.empty()
         full_response = ""
         try:
-            # 🌟 핵심: 이미지가 있으면 [이미지, 텍스트] 리스트로 묶어서 Gemini에 전송!
             contents = [img_to_send, final_prompt] if img_to_send else final_prompt
 
             response_stream = st.session_state.chat.send_message_stream(contents)
