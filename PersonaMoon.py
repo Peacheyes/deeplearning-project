@@ -145,7 +145,7 @@ if "current_mode" not in st.session_state or st.session_state.current_mode != se
     st.session_state.messages.append({"role": "assistant", "content": welcome_msg, "image": None})
 
 # ==========================================
-# 6. 메인 화면 및 추천 질문 버튼 (Expander 추가)
+# 6. 메인 화면 및 추천 질문 버튼
 # ==========================================
 st.title(f"{selected_mode}")
 st.write("아래 추천 질문을 클릭하거나 직접 입력해 보세요! 이미지 분석도 가능합니다.")
@@ -166,13 +166,10 @@ else:
     if col2.button("🤝 팀플 역할 분담 방식"): button_prompt = "팀 프로젝트를 할 때 일을 N분의 1로 나누는 것에 대해 어떻게 생각하나요?"
     if col3.button("⚡ 팀원 간 의견 충돌 시"): button_prompt = "프로젝트 진행 중 팀원들과 의견 충돌(노이즈)이 발생하면 어떻게 대처하나요?"
 
-# 🌟 동적 UI 2: 파일 업로드 창을 아코디언 메뉴(Expander)로 숨기기
+# 🌟 중복 오류 해결: 바깥에 있던 st.file_uploader를 지우고 Expander 안에만 단 하나 배치
 with st.expander("📎 이미지 및 차트 분석 기능 열기 (선택사항)", expanded=False):
     uploaded_file = st.file_uploader("분석할 이미지(차트, 데이터 분포, 다이어그램 등)가 있다면 이곳에 올려주세요.", type=['png', 'jpg', 'jpeg'])
     st.caption("※ 이미지를 업로드한 후, 메인 채팅창에 질문을 입력하시면 AI가 함께 분석해 드립니다.")
-# 🌟 이미지 업로드 UI 추가
-uploaded_file = st.file_uploader("📎 분석할 이미지나 차트가 있다면 업로드해 주세요 (선택사항)", type=['png', 'jpg', 'jpeg'])
-
 # ==========================================
 # 🌟 아바타(Avatar) 결정 헬퍼 함수 추가
 # ==========================================
