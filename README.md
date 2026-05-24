@@ -1,25 +1,27 @@
-단순히 텍스트를 나열하는 정적인 이력서를 넘어, 저의 전공 지식, 문제 해결 철학, 그리고 인간적인 매력을 직접 대화하며 알아갈 수 있도록 설계한 인터랙티브 AI 포트폴리오(디지털 트윈)입니다.
+# 🤖 Interactive Digital Twin: Multi-Persona AI Portfolio
 
-시스템 아키텍처 (System Architecture)
+단순히 텍스트를 나열하는 정적인 이력서를 넘어, 저(문민승)의 전공 지식, 문제 해결 철학, 그리고 인간적인 매력을 직접 대화하며 알아갈 수 있도록 설계한 **인터랙티브 AI 포트폴리오(디지털 트윈)**입니다.
+
+## 🏗️ 시스템 아키텍처 (System Architecture)
 
 본 프로젝트는 생성형 AI의 언어 및 시각 인지 능력을 웹 서비스로 완벽하게 통합하기 위해 다음과 같은 아키텍처로 구성되었습니다.
 
-   **Frontend (UI/UX):** `Streamlit`
+*   **Frontend (UI/UX):** `Streamlit`
     *   Python 기반의 반응형 웹 인터페이스 구축
     *   Custom CSS 주입을 통한 상용 서비스 수준의 UI/UX 최적화 (채팅 말풍선 렌더링, 동적 버튼 호버링)
     *   Session State를 활용한 대화 기록 메모리 유지 및 모드(Persona)별 UI 동적 전환 (Toast 알림, Expander 등)
-   **Backend & LLM:** `Google Gemini 2.5 Flash API`
+*   **Backend & LLM:** `Google Gemini 2.5 Flash API`
     *   실시간 텍스트 스트리밍(Streaming) 처리를 통한 응답 지연(Latency) 최소화
     *   **Multimodal (Vision) 연동:** `Pillow` 라이브러리로 업로드된 이미지를 리사이징하여 API에 전송, 복잡한 데이터 차트나 프로세스 다이어그램을 AI가 시각적으로 분석하도록 구현
-   **Deployment (CI/CD):** `Streamlit Community Cloud` & `GitHub`
+*   **Deployment (CI/CD):** `Streamlit Community Cloud` & `GitHub`
     *   GitHub 저장소와 연동하여 코드 수정 시 실시간 무중단 배포(Deployment) 환경 구축
     *   `st.secrets`를 활용한 API Key 환경 변수 분리로 보안(Security) 강화
 
 ---
 
-프롬프트 설계 의도 (Prompt Engineering)
+## 🧠 프롬프트 설계 의도 (Prompt Engineering)
 
-이 챗봇의 핵심은 단순히 지식을 검색하는 것이 아니라, '문민승이라는 사람의 사고방식과 경험을 복제'하는 데 있습니다. 이를 위해 System Instruction(시스템 지침)을 3개의 페르소나로 분리하여 모듈화했습니다.
+이 챗봇의 핵심은 단순히 지식을 검색하는 것이 아니라, **'문민승이라는 사람의 사고방식과 경험을 복제'**하는 데 있습니다. 이를 위해 System Instruction(시스템 지침)을 3개의 페르소나로 분리하여 모듈화했습니다.
 
 ### 1. Multi-Persona 모듈화 및 Context Injection (문맥 주입)
 환각 현상(Hallucination)을 방지하고 실제 제 경험만을 답변하도록, 각 페르소나에 구체적인 과거 프로젝트 데이터(Data Grounding)를 주입했습니다.
@@ -30,6 +32,9 @@
 ### 2. Tone & Manner (페르소나 튜닝)
 *   모든 응답에 1인칭 대명사('저', '제가')를 사용하도록 강제하여, 사용자가 실제 저와 대화하는 듯한 몰입감을 주었습니다.
 *   자신감 있으면서도 예의 바른 톤을 유지하도록 Temperature와 Top-P 파라미터를 세밀하게 조정(T=0.7)하여, 포트폴리오 목적에 맞는 안정적인 출력을 유도했습니다.
+
+### 3. 멀티모달 시각 분석 지침 (Vision Prompting)
+*   테크 모드에서는 사용자가 업로드한 이미지를 단순히 설명하는 것을 넘어, **"데이터 사이언티스트의 관점에서 노이즈를 식별하고 인사이트를 도출하라"**는 명시적 지침을 추가하여 전공자다운 날카로운 시각 분석이 가능하게 했습니다.
 
 ---
 
